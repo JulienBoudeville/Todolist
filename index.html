@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+	<script src='https://apis.google.com/js/platform.js'></script>
+	<meta name="google-signin-client_id" content="875299489419-hjuipbrf1ar4fnmn6niq5bbvpo44c6kh.apps.googleusercontent.com">
+	</head>
+<body>
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+<form id="formulaire">
+<input id="saisie">
+</form>
+<div id="afaire">
+</div>
+<div id="faite">
+</div>
+<script>
+function onSignIn(googleUser) {
+  var profile = googleUser.getBasicProfile();
+  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+  console.log('Name: ' + profile.getName());
+  console.log('Image URL: ' + profile.getImageUrl());
+  console.log('Email: ' + profile.getEmail());
+  startApp();
+}
+
+function startApp () {
+var myDataRef = new Firebase('https://to-do-list-new.firebaseio.com/');
+           document.getElementById('formulaire').onsubmit = function(evt) {
+                evt.preventDefault();
+              console.log(document.getElementById('saisie').value);
+                myDataRef.push({
+                    name: document.getElementById('saisie').value,
+                    done: false
+                });
+            };
+            myDataRef.on('child_added', function(snapshot) {
+                var tache = snapshot.val();
+                console.log(snapshot.key(), tache.name);
+                var afaire = document.getElementById('afaire');
+                var checked = '';
+                if (tache.done) {
+                    checked = 'checked="true"';
+                }
+                afaire.innerHTML = afaire.innerHTML + '<p '
+                    + 'id="' + snapshot.key() + '">'
+                    + '<input onclick="cocherTache(\'' + snapshot.key() + '\')" type="checkbox" ' + checked + '">'
+                    + '<span onclick="supprimerTache(\'' + snapshot.key() + '\')">' + tache.name + '</span>'
+                    + '</p>';
+            });
+            function supprimerTache(key) {
+                console.log('supprimer', key);
+                var refTache = new Firebase('https://flickering-inferno-5369.firebaseIO.com/' + key);
+                refTache.remove();
+                var elem = document.getElementById(key);
+                elem.parentElement.removeChild(elem);
+            }
+            function cocherTache(key) {
+                console.log('cocher', key);
+                var refTache = new Firebase('https://flickering-inferno-5369.firebaseIO.com/' + key);
+                refTache.update({ done: true });
+            }
+	}
+</script>
+</body>
+</html>
